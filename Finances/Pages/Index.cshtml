@@ -38,8 +38,6 @@
 
         <label>Tipo de Transação</label>
         <input class="form-control" type="text" id="txtTransactionType" />
-
-
         <br />
         <button type="submit" class="btn btn-default" id="btnRegisterTypeTransaction">Registrar Tipo de Transação</button>
 
@@ -49,33 +47,25 @@
 
         <label>Categoria</label>
         <input class="form-control" type="text" id="txtCategory" />
-
-
         <br />
         <button type="submit" class="btn btn-default" id="btnRegisterCategory">Registrar Categoria</button>
 
     </div>
 
     <div class="col-md-3">
-
         <label>Sub-Categoria</label>
         <input class="form-control" type="text" id="txtSubCategory" />
         <label>Categoria</label>
-        <select class="form-control" id="lstCategory">
-        </select>
-
+        <select class="form-control" id="lstCategory"></select>
         <br />
         <button type="submit" class="btn btn-default" id="btnRegisterSubCategory">Registrar Sub-Categoria</button>
-
     </div>
-
-
 
 </div>
 <br />
 
 <div class="row">
-    <div class="col-md-3">
+    <div class="col-md-4">
         <label>Tipo de Transação</label>
         <select class="form-control" id="lstTransactionType"></select>
         <label>Data</label>
@@ -84,25 +74,46 @@
         <input class="form-control" type="number" id="vlTransaction" />
     </div>
 
-    <div class="col-md-3">
+    <div class="col-md-4">
         <label>Descrição da Transação</label>
         <input class="form-control" type="text" id="txtTransaction" />
         <label>Categoria</label>
-        <label>Usuário</label>
-        <label>Usuário Destinatário</label>
-        <input type="radio" name="rdnHasReceipt" />
+        <input class="form-control" type="search" id="autoCompleteCategoryTransaction" list="categories" />
+        <label>Sub-Categoria</label>
+        <input class="form-control" type="search" id="autoCompleteSubCategoryTransaction" list="categoriesTransaction" />
+        <datalist id="categoriesTransaction"></datalist>
     </div>
 
+    <div class="col-md-4">
+        <label>Usuário</label>
+        <input class="form-control" type="search" id="autoCompleteUser" list="users" />
+        <datalist id="users"></datalist>
+        <label>Usuário Destinatário</label>
+        <input class="form-control" type="search" id="autoCompleteUserDestination" list="users" />
+        <label>Possui comprovante?</label>
+        <div class="radio">
+            <label><input type="radio" name="rdnHasReceipt" checked />Sim</label>
+        </div>
+        <div class="radio">
+            <label><input type="radio" name="rdnHasReceipt">Não</label>
+        </div>
+    </div>
+    <br />
 </div>
+<button type="submit" class="btn btn-default" id="btnRegisterTransaction">Realizar Transação</button>
+
+<br />
+<br />
+<br />
 <br />
 <div class="row">
     <div class="col-md-3">
         <label>Busca de Categorias</label>
         <input class="form-control" type="search" id="autoCompleteCategory" list="categories" />
+        <datalist id="categories"></datalist>
         <br />
         <button id="btnEditCategory" class="btn btn-default">Editar</button>
         <button id="btnDeleteCategory" class="btn btn-default">Deletar</button>
-        <datalist id="categories"></datalist>
     </div>
 
     <div class="col-md-3">
@@ -129,46 +140,89 @@
 
 @section scripts{
     <script type="text/javascript">
-        $(document).ready(function () {
 
+        var url = "http://localhost:58274/";
+
+        $(document).ready(function () {
             fillCategory();
             fillSubCategory();
+            fillUsers();
             fillTransactionsType();
-
+            fillSubCategoriesByCategory();
         });
 
-        function fillCategory() {
+        function fillSubCategoriesByCategory() {
 
-            $('#lstCategory').html('')
-            $('#autoCompleteCategory').val('')
-            $('#categories').html('')
+            $('#autoCompleteUser').val('');
+            $('#autoCompleteUserDestination').val('');
+            $('#users').html('');
 
             $.ajax({
                 type: "GET",
-                url: "http://localhost:60121/api/category",
+                url: url + "/api/user",
+                contentType: "application/json",
+                cache: false,
+                success: function (data) {
+                    $.each(data, function (index, item) {
+                        $('#users').append($('<option></option>').val(item.userName));
+                    });
+                }
+            });
+
+        }
+
+        function fillUsers() {
+
+            $('#autoCompleteUser').val('');
+            $('#autoCompleteUserDestination').val('');
+            $('#users').html('');
+
+            $.ajax({
+                type: "GET",
+                url: url + "/api/user",
                 contentType: "application/json",
                 cache: false,
                 success: function (data) {
 
-                    $('#lstCategory').append($('<option></option>').text('Selecione').val(0))
                     $.each(data, function (index, item) {
-                        $('#lstCategory').append($('<option></option>').text(item.dsCategory).val(item.idCategory))
-                        $('#categories').append($('<option></option>').text(item.idCategory).val(item.dsCategory))
+                        $('#users').append($('<option></option>').val(item.userName));
                     });
                 }
             });
-            
+        }
+
+        function fillCategory() {
+
+            $('#lstCategory').html('');
+            $('#autoCompleteCategory').val('');
+            $('#categories').html('');
+
+            $.ajax({
+                type: "GET",
+                url: url + "/api/category",
+                contentType: "application/json",
+                cache: false,
+                success: function (data) {
+
+                    $('#lstCategory').append($('<option></option>').text('Selecione').val(0));
+                    $.each(data, function (index, item) {
+                        $('#lstCategory').append($('<option></option>').text(item.dsCategory).val(item.idCategory));
+                        $('#categories').append($('<option></option>').text(item.idCategory).val(item.dsCategory));
+                    });
+                }
+            });
+
         }
 
         function fillSubCategory() {
 
             //$('#lstCategory').html('')
-            $('#autoCompleteSubCategory').val('')
-            $('#subcategories').html('')
+            $('#autoCompleteSubCategory').val('');
+            $('#subcategories').html('');
 
             $.ajax({
                 type: "GET",
-                url: "http://localhost:60121/api/subcategory",
+                url: url + "/api/subcategory",
                 contentType: "application/json",
                 cache: false,
                 success: function (data) {
@@ -176,7 +230,7 @@
                     //$('#lstCategory').append($('<option></option>').text('Selecione').val(0))
                     $.each(data, function (index, item) {
                         //$('#lstCategory').append($('<option></option>').text(item.dsCategory).val(item.idCategory))
-                        $('#subcategories').append($('<option></option>').text(item.idSubCategory).val(item.dsSubCategory))
+                        $('#subcategories').append($('<option></option>').text(item.idSubCategory).val(item.dsSubCategory));
                     });
                 }
             });
@@ -186,21 +240,21 @@
 
         function fillTransactionsType() {
 
-            //$('#lstCategory').html('')
-            $('#autoCompleteTransactionType').val('')
-            $('#transactionstype').html('')
+            $('#lstTransactionType').html('');
+            $('#autoCompleteTransactionType').val('');
+            $('#transactionstype').html('');
 
             $.ajax({
                 type: "GET",
-                url: "http://localhost:60121/api/transactiontype",
+                url: url + "/api/transactiontype",
                 contentType: "application/json",
                 cache: false,
                 success: function (data) {
 
-                    //$('#lstCategory').append($('<option></option>').text('Selecione').val(0))
+                    $('#lstTransactionType').append($('<option></option>').text('Selecione').val(0));
                     $.each(data, function (index, item) {
-                        //$('#lstCategory').append($('<option></option>').text(item.dsCategory).val(item.idCategory))
-                        $('#transactionstype').append($('<option></option>').text(item.idTransactionType).val(item.dsTransactionType))
+                        $('#lstTransactionType').append($('<option></option>').text(item.dsTransactionType).val(item.idTransactionType));
+                        $('#transactionstype').append($('<option></option>').text(item.idTransactionType).val(item.dsTransactionType));
                     });
                 }
             });
@@ -212,19 +266,19 @@
 
             $('#btnDeleteTransactionType').on('click', function () {
 
-                var namTransactionType = $('#autoCompleteTransactionType').val()
+                var namTransactionType = $('#autoCompleteTransactionType').val();
 
-                var idTransactionType = $("#transactionstype option[value='" + namTransactionType + "']").text()
+                var idTransactionType = $("#transactionstype option[value='" + namTransactionType + "']").text();
 
                 $.ajax({
                     type: "DELETE",
-                    url: "http://localhost:60121/api/transactionType/" + idTransactionType,
+                    url: url + "/api/transactionType/" + idTransactionType,
                     contentType: "application/json",
                     success: function (data) {
 
                         //$('#txtCategory').val('')
-                        alert(data)
-                        fillTransactionsType()
+                        alert(data);
+                        fillTransactionsType();
                     }
 
                 });
@@ -247,15 +301,15 @@
 
                 $.ajax({
                     type: "PUT",
-                    url: "http://localhost:60121/api/transactionType/" + idTransactionType,
+                    url: url + "api/transactionType/" + idTransactionType,
                     contentType: "application/json",
                     data: JSON.stringify(data),
                     cache: false,
                     success: function (data) {
 
-                        $('#txtTransactionType').val('')
-                        alert('EDIÇÃO DE TIPO DE TRANSAÇÃO REALIZADO COM SUCESSO.')
-                        fillTransactionsType()
+                        $('#txtTransactionType').val('');
+                        alert('EDIÇÃO DE TIPO DE TRANSAÇÃO REALIZADO COM SUCESSO.');
+                        fillTransactionsType();
                     }
                 });
 
@@ -263,50 +317,50 @@
 
             $('#btnDeleteCategory').on('click', function () {
 
-                var namCategory = $('#autoCompleteCategory').val()
+                var namCategory = $('#autoCompleteCategory').val();
 
-                var idCategory = $("#categories option[value='" + namCategory + "']").text()
+                var idCategory = $("#categories option[value='" + namCategory + "']").text();
 
                 $.ajax({
                     type: "DELETE",
-                    url: "http://localhost:60121/api/category/" + idCategory,
+                    url: url + "/api/category/" + idCategory,
                     contentType: "application/json",
                     success: function (data) {
 
-                        $('#txtCategory').val('')
-                        alert(data)
-                        fillCategory()
-                    }                
-                    
+                        $('#txtCategory').val('');
+                        alert(data);
+                        fillCategory();
+                    }
+
                 });
 
             });
 
             $('#btnEditCategory').on('click', function () {
 
-                var namCategory = $('#autoCompleteCategory').val()
+                var namCategory = $('#autoCompleteCategory').val();
 
-                var idCategory = $("#categories option[value='" + namCategory + "']").text()
+                var idCategory = $("#categories option[value='" + namCategory + "']").text();
 
-                var descricaoCategoria = $('#txtCategory').val()
-                
+                var descricaoCategoria = $('#txtCategory').val();
+
                 var data = {
 
                     "DsCategory": descricaoCategoria,
                     "IdCategory": idCategory
-                }
+                };
 
                 $.ajax({
                     type: "PUT",
-                    url: "http://localhost:60121/api/category/" + idCategory,
+                    url: url + "/api/category/" + idCategory,
                     contentType: "application/json",
                     data: JSON.stringify(data),
                     cache: false,
                     success: function (data) {
 
-                        $('#txtCategory').val('')
-                        alert('EDIÇÃO DE CATEGORIA REALIZADO COM SUCESSO.')
-                        fillCategory()
+                        $('#txtCategory').val('');
+                        alert('EDIÇÃO DE CATEGORIA REALIZADO COM SUCESSO.');
+                        fillCategory();
                     }
                 });
 
@@ -320,13 +374,13 @@
 
                 $.ajax({
                     type: "DELETE",
-                    url: "http://localhost:60121/api/subcategory/" + idSubCategory,
+                    url: url + "/api/subcategory/" + idSubCategory,
                     contentType: "application/json",
                     success: function (data) {
 
-                        $('#txtSubCategory').val('')
-                        alert(data)
-                        fillSubCategory()
+                        $('#txtSubCategory').val('');
+                        alert(data);
+                        fillSubCategory();
                     }
 
                 });
@@ -335,15 +389,15 @@
 
             $('#btnEditSubCategory').on('click', function () {
 
-                var namSubCategory = $('#autoCompleteSubCategory').val()
+                var namSubCategory = $('#autoCompleteSubCategory').val();
 
-                var idSubCategory = $("#subcategories option[value='" + namSubCategory + "']").text()
+                var idSubCategory = $("#subcategories option[value='" + namSubCategory + "']").text();
 
-                var descricaoSubCategoria = $('#txtSubCategory').val()
+                var descricaoSubCategoria = $('#txtSubCategory').val();
 
-                var selectedCategory = $('#lstCategory').val()
+                var selectedCategory = $('#lstCategory').val();
 
-                if (selectedCategory == 0) {
+                if (selectedCategory === 0) {
                     return;
                 }
 
@@ -356,16 +410,16 @@
 
                 $.ajax({
                     type: "PUT",
-                    url: "http://localhost:60121/api/subcategory/" + idSubCategory,
+                    url: url + "/api/subcategory/" + idSubCategory,
                     contentType: "application/json",
                     data: JSON.stringify(data),
                     cache: false,
                     success: function (data) {
 
-                        $('#txtSubCategory').val('')
-                        $('#lstCategory').val(0)
-                        alert('EDIÇÃO DE SUB-CATEGORIA REALIZADO COM SUCESSO.')
-                        fillSubCategory()
+                        $('#txtSubCategory').val('');
+                        $('#lstCategory').val(0);
+                        alert('EDIÇÃO DE SUB-CATEGORIA REALIZADO COM SUCESSO.');
+                        fillSubCategory();
                     }
                 });
 
@@ -373,10 +427,10 @@
 
             $('#btnRegisterSubCategory').on('click', function () {
 
-                var descricaoSubCategory = $('#txtSubCategory').val()
-                var selectedCategory = $('#lstCategory').val()
+                var descricaoSubCategory = $('#txtSubCategory').val();
+                var selectedCategory = $('#lstCategory').val();
 
-                if (selectedCategory == 0) {
+                if (selectedCategory === 0) {
                     return;
 
                 }
@@ -385,20 +439,20 @@
 
                     "DsSubCategory": descricaoSubCategory,
                     "IdCategory": selectedCategory
-                }
+                };
 
                 $.ajax({
                     type: "POST",
-                    url: "http://localhost:60121/api/subcategory",
+                    url: url + "/api/subcategory",
                     contentType: "application/json",
                     data: JSON.stringify(data),
                     cache: false,
                     success: function (data) {
 
-                        $('#txtSubCategory').val('')
-                        $('#lstCategory').val(0)
-                        fillSubCategory()
-                        alert('CADASTRO DE SUB-CATEGORIA REALIZADO COM SUCESSO.')
+                        $('#txtSubCategory').val('');
+                        $('#lstCategory').val(0);
+                        fillSubCategory();
+                        alert('CADASTRO DE SUB-CATEGORIA REALIZADO COM SUCESSO.');
 
                     }
                 });
@@ -407,7 +461,7 @@
 
             $('#btnRegisterCategory').on('click', function () {
 
-                var descricaoCategoria = $('#txtCategory').val()
+                var descricaoCategoria = $('#txtCategory').val();
 
                 var data = {
 
@@ -415,23 +469,23 @@
                 }
                 $.ajax({
                     type: "POST",
-                    url: "http://localhost:60121/api/category",
+                    url: url + "/api/category",
                     contentType: "application/json",
                     data: JSON.stringify(data),
                     cache: false,
                     success: function (data) {
 
-                        $('#txtCategory').val('')
-                        alert('CADASTRO DE CATEGORIA REALIZADO COM SUCESSO.')
-                        fillCategory()
+                        $('#txtCategory').val('');
+                        alert('CADASTRO DE CATEGORIA REALIZADO COM SUCESSO.');
+                        fillCategory();
                     }
                 });
 
-            });         
+            });
 
             $('#btnRegisterTypeTransaction').on('click', function () {
 
-                var descricaoTipoTransacao = $('#txtTransactionType').val()
+                var descricaoTipoTransacao = $('#txtTransactionType').val();
 
                 var data = {
 
@@ -440,15 +494,15 @@
 
                 $.ajax({
                     type: "POST",
-                    url: "http://localhost:60121/api/transactiontype",
+                    url: url + "/api/transactiontype",
                     contentType: "application/json",
                     data: JSON.stringify(data),
                     cache: false,
                     success: function (data) {
 
-                        $('#txtTransactionType').val('')                    
-                        alert('CADASTRO DE TIPO DE TRANSAÇÃO REALIZADO COM SUCESSO.')
-
+                        $('#txtTransactionType').val('');
+                        alert('CADASTRO DE TIPO DE TRANSAÇÃO REALIZADO COM SUCESSO.');
+                        fillTransactionsType()
                     }
                 });
 
@@ -456,10 +510,10 @@
 
             $('#btnRegisterUser').on('click', function () {
 
-                var username = $('#txtUsername').val()
-                var password = $('#txtPassword').val()
-                var email = $('#txtEmail').val()
-                var celphone = $('#txtCelphone').val()
+                var username = $('#txtUsername').val();
+                var password = $('#txtPassword').val();
+                var email = $('#txtEmail').val();
+                var celphone = $('#txtCelphone').val();
 
                 var data = {
 
@@ -467,22 +521,22 @@
                     "Password": password,
                     "Email": email,
                     "CelUser": celphone
-                }
+                };
 
                 $.ajax({
                     type: "POST",
-                    url: "http://localhost:60121/api/user",
+                    url: url + "/api/user",
                     contentType: "application/json",
                     data: JSON.stringify(data),
                     cache: false,
                     success: function (data) {
 
-                        $('#txtUsername').val('')
-                        $('#txtPassword').val('')
-                        $('#txtEmail').val('')
-                        $('#txtCelphone').val('')
+                        $('#txtUsername').val('');
+                        $('#txtPassword').val('');
+                        $('#txtEmail').val('');
+                        $('#txtCelphone').val('');
 
-
+                        fillUsers();
                     }
                 });
 
