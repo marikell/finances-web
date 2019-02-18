@@ -80,8 +80,8 @@
         <label>Categoria</label>
         <input class="form-control" type="search" id="autoCompleteCategoryTransaction" list="categories" />
         <label>Sub-Categoria</label>
-        <input class="form-control" type="search" id="autoCompleteSubCategoryTransaction" list="categoriesTransaction" />
-        <datalist id="categoriesTransaction"></datalist>
+        <input class="form-control" type="search" id="autoCompleteSubCategoryTransaction" list="subCategoriesTransaction" />
+        <datalist id="subCategoriesTransaction"></datalist>
     </div>
 
     <div class="col-md-4">
@@ -153,20 +153,31 @@
 
         function fillSubCategoriesByCategory() {
 
-            $('#autoCompleteUser').val('');
-            $('#autoCompleteUserDestination').val('');
-            $('#users').html('');
+            $('#autoCompleteSubCategoryTransaction').val('');
+            $('#subCategoriesTransaction').html('');
+
+            var namCategory = $('#autoCompleteCategoryTransaction').val();
+
+
+            if (namCategory === '') {
+                return;
+            }
+
+            var idCategory = $("#categories option[value='" + namCategory + "']").text();
+
 
             $.ajax({
                 type: "GET",
-                url: url + "/api/user",
+                url: url + "api/subcategory/category/" + idCategory,
                 contentType: "application/json",
-                cache: false,
                 success: function (data) {
+
                     $.each(data, function (index, item) {
-                        $('#users').append($('<option></option>').val(item.userName));
+                        $('#subCategoriesTransaction').append($('<option></option>').text(item.idSubCategory).val(item.dsSubCategory));
                     });
+
                 }
+
             });
 
         }
@@ -264,6 +275,13 @@
 
         $(function () {
 
+
+            $('#autoCompleteCategoryTransaction').on('change', function () {
+
+                fillSubCategoriesByCategory();
+
+            });
+
             $('#btnDeleteTransactionType').on('click', function () {
 
                 var namTransactionType = $('#autoCompleteTransactionType').val();
@@ -297,7 +315,7 @@
 
                     "DsTransactionType": descricaoTransactionType,
                     "IdTransactionType": idTransactionType
-                }
+                };
 
                 $.ajax({
                     type: "PUT",
@@ -420,6 +438,115 @@
                         $('#lstCategory').val(0);
                         alert('EDIÇÃO DE SUB-CATEGORIA REALIZADO COM SUCESSO.');
                         fillSubCategory();
+                    }
+                });
+
+            });
+
+            $('#btnRegisterTransaction').on('click', function () {
+
+                //Sub-Categoria
+                var namSubCategory = $('#autoCompleteSubCategoryTransaction').val();
+
+                if (namSubCategory === '') {
+                    return;
+                }                
+                var idSubCategory = $("#subCategoriesTransaction option[value='" + namSubCategory + "']").text();
+
+                //Categoria
+                var namCategory = $('#autoCompleteCategoryTransaction').val();
+
+                if (namCategory === '') {
+                    return;
+                }
+                var idCategory = $("#categories option[value='" + namCategory + "']").text();
+
+                //Transaction Type
+
+                var idTransactionType = $('#lstTransactionType').val();
+
+                if (idTransactionType === '') {
+                    return;
+                }
+
+
+                //Dat Transaction
+
+                var datTransaction = $('#dtTransaction').val();
+
+                if (datTransaction === '') {
+                    return;
+                }
+
+                //VlTransaction
+
+                var valTransaction = parseFloat($('#vlTransaction').val());
+
+
+
+                if (valTransaction === '') {
+                    return;
+                }
+
+
+                //DsTransaction
+
+                var dsTransaction = $('#txtTransaction').val();
+
+                if (dsTransaction === '') {
+                    return;
+                }
+
+                //User
+                var namUser = $('#autoCompleteUser').val();
+
+                if (namSubCategory === '') {
+                    return;
+                }
+
+                var idUser = $("#users option[value='" + namUser + "']").text();
+
+                //UserDestination
+                var namUserDestination = $('#autoCompleteUserDestination').val();
+                var idUserDestination;
+
+                if (namUserDestination === '') {
+                    idUserDestination = null;
+                }
+                else {
+                    idUserDestination = $("#users option[value='" + namUserDestination + "']").text();
+                }              
+
+                //HasReceipt
+                var hasReceipt = $("input[name='rdnHasReceipt']:checked").val() ? true: false;
+
+
+
+                var data = {
+
+                    "idTransactionType": idTransactionType,
+                    "datTransaction": datTransaction,
+                    "vlTransaction": val,
+                    "dsTransaction": dsTransaction,
+                    "idCategory": idCategory,
+                    "idUser": idUser,
+                    "idUserDestination": idUserDestination,
+                    "hasReceipt": hasReceipt
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: url + "/api/transaction",
+                    contentType: "application/json",
+                    data: JSON.stringify(data),
+                    cache: false,
+                    success: function (data) {
+
+                        //$('#txtSubCategory').val('');
+                        //$('#lstCategory').val(0);
+                        //fillSubCategory();
+                        alert('TRANSAÇÃO REALIZADO COM SUCESSO.');
+
                     }
                 });
 
