@@ -92,10 +92,10 @@
         <input class="form-control" type="search" id="autoCompleteUserDestination" list="users" />
         <label>Possui comprovante?</label>
         <div class="radio">
-            <label><input type="radio" name="rdnHasReceipt" checked />Sim</label>
+            <label><input type="radio" name="rdnHasReceipt" value="0" />Sim</label>
         </div>
         <div class="radio">
-            <label><input type="radio" name="rdnHasReceipt">Não</label>
+            <label><input type="radio" name="rdnHasReceipt" value="1">Não</label>
         </div>
     </div>
     <br />
@@ -141,7 +141,7 @@
 @section scripts{
     <script type="text/javascript">
 
-        var url = "http://localhost:58274/";
+        var url = "http://localhost:55532/";
 
         $(document).ready(function () {
             fillCategory();
@@ -196,7 +196,8 @@
                 success: function (data) {
 
                     $.each(data, function (index, item) {
-                        $('#users').append($('<option></option>').val(item.userName));
+                        debugger;
+                        $('#users').append($('<option></option>').text(item.id).val(item.userName));
                     });
                 }
             });
@@ -445,6 +446,8 @@
 
             $('#btnRegisterTransaction').on('click', function () {
 
+                debugger;
+
                 //Sub-Categoria
                 var namSubCategory = $('#autoCompleteSubCategoryTransaction').val();
 
@@ -465,7 +468,7 @@
 
                 var idTransactionType = $('#lstTransactionType').val();
 
-                if (idTransactionType === '') {
+                if (idTransactionType === '' || idTransactionType === 0) {
                     return;
                 }
 
@@ -500,7 +503,7 @@
                 //User
                 var namUser = $('#autoCompleteUser').val();
 
-                if (namSubCategory === '') {
+                if (namUser === '') {
                     return;
                 }
 
@@ -518,20 +521,21 @@
                 }              
 
                 //HasReceipt
-                var hasReceipt = $("input[name='rdnHasReceipt']:checked").val() ? true: false;
+                var hasReceipt = $("input[name='rdnHasReceipt']:checked").val() === 0 ? true: false;
 
 
 
                 var data = {
 
-                    "idTransactionType": idTransactionType,
-                    "datTransaction": datTransaction,
-                    "vlTransaction": val,
-                    "dsTransaction": dsTransaction,
-                    "idCategory": idCategory,
-                    "idUser": idUser,
-                    "idUserDestination": idUserDestination,
-                    "hasReceipt": hasReceipt
+                    "IdTransactionType": idTransactionType,
+                    "DatTransaction": datTransaction,
+                    "VlTransaction": valTransaction,
+                    "DsTransaction": dsTransaction,
+                    "IdSubCategory": idSubCategory,
+                    "IdCategory": idCategory,
+                    "IdUser": idUser,
+                    "IdUserDestination": idUserDestination,
+                    "HasReceipt": hasReceipt
                 };
 
                 $.ajax({
